@@ -1,5 +1,4 @@
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -32,8 +31,6 @@ import org.jsoup.select.Elements;
 import com.google.common.net.InternetDomainName;
 
 public class FeaturesExtractor {
-	
-	//private final static String GOOGLE_API_KEY = "AIzaSyDE3iyiYkwM4jfwY4SlAFpFEUJBkaTiT2Y"; //100 request per day
 	
 	public static double[] extract(String url, int numAttributes) {
 			
@@ -674,7 +671,7 @@ public class FeaturesExtractor {
 		JSONObject objJ = null;
 		try {
 		
-			BufferedReader buf = new BufferedReader(new FileReader("google_api_key"));
+			BufferedReader buf = new BufferedReader(new FileReader("google_api_key")); //100 request per day
 			String GOOGLE_API_KEY = buf.readLine();
 			buf.close();
 		  
