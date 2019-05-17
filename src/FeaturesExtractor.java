@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
-
+import java.io.File;
+import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -32,7 +33,7 @@ import com.google.common.net.InternetDomainName;
 
 public class FeaturesExtractor {
 	
-	private final static String GOOGLE_API_KEY = "AIzaSyDE3iyiYkwM4jfwY4SlAFpFEUJBkaTiT2Y"; //100 request per day
+	//private final static String GOOGLE_API_KEY = "AIzaSyDE3iyiYkwM4jfwY4SlAFpFEUJBkaTiT2Y"; //100 request per day
 	
 	public static double[] extract(String url, int numAttributes) {
 			
@@ -672,6 +673,11 @@ public class FeaturesExtractor {
 	    
 		JSONObject objJ = null;
 		try {
+		
+			BufferedReader buf = new BufferedReader(new FileReader("google_api_key"));
+			String GOOGLE_API_KEY = buf.readLine();
+			buf.close();
+		  
 		  URL searchUrl = new URL(
 	                "https://www.googleapis.com/customsearch/v1?key=" + GOOGLE_API_KEY + "&cx=013036536707430787589:_pqjad5hr1a&q=site:" + url + "&alt=json");
 	        HttpURLConnection conn = (HttpURLConnection) searchUrl.openConnection();
