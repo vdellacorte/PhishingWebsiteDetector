@@ -1,15 +1,8 @@
 import java.io.File;
-import java.io.FileWriter;
-import java.io.OutputStreamWriter;
-import java.util.Random;
 
-import weka.attributeSelection.CfsSubsetEval;
 import weka.attributeSelection.GainRatioAttributeEval;
-import weka.attributeSelection.GreedyStepwise;
 import weka.attributeSelection.Ranker;
 import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.meta.AttributeSelectedClassifier;
 import weka.classifiers.meta.Bagging;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.meta.RandomSubSpace;
@@ -19,11 +12,9 @@ import weka.core.Capabilities;
 import weka.core.Debug;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.filters.Filter;
-import weka.filters.MultiFilter;
+
 import weka.filters.supervised.attribute.AttributeSelection;
-import weka.filters.unsupervised.attribute.NominalToBinary;
-import weka.filters.unsupervised.attribute.NumericToNominal;
+
 
 public class MyClassifier extends AbstractClassifier{
 
