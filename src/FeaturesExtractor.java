@@ -709,28 +709,6 @@ public class FeaturesExtractor {
 	     
 		//---- LINKS POINTING TO PAGE
 		
-		/*try {
-			
-			URL searchUrl = new URL(
-			        "https://www.googleapis.com/customsearch/v1?key=" + GOOGLE_API_KEY + "&cx=013036536707430787589:_pqjad5hr1a&q=site:" + url + "&alt=json");
-
-	        HttpURLConnection conn = (HttpURLConnection) searchUrl.openConnection();
-	        conn.setRequestMethod("GET");
-	        conn.setRequestProperty("Accept", "application/json");
-	
-			BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-	
-	
-	        String output; 
-	        String result="";
-	
-			while ((output = br.readLine()) != null)
-					result += output;
-				
-	
-	        JSONObject obj = new JSONObject(result);
-	        conn.disconnect();
-		 */
 		try {
 			
 		   int numLinksPointing = 0;

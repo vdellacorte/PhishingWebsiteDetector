@@ -1,5 +1,4 @@
 import java.io.File;
-
 import weka.attributeSelection.GainRatioAttributeEval;
 import weka.attributeSelection.Ranker;
 import weka.classifiers.AbstractClassifier;
@@ -7,12 +6,11 @@ import weka.classifiers.meta.Bagging;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.meta.RandomSubSpace;
 import weka.classifiers.misc.SerializedClassifier;
-import weka.classifiers.trees.RandomForest;
+import weka.classifiers.rules.PART;
 import weka.core.Capabilities;
 import weka.core.Debug;
 import weka.core.Instance;
 import weka.core.Instances;
-
 import weka.filters.supervised.attribute.AttributeSelection;
 
 
@@ -37,8 +35,8 @@ public class MyClassifier extends AbstractClassifier{
 	}
 	
 	private void saveModel(Instances data) throws Exception {
-		
-		RandomForest rf = new RandomForest();
+
+		PART pa = new PART();
 		Bagging bg = new Bagging();
 		RandomSubSpace rss = new RandomSubSpace();
 		FilteredClassifier fc = new FilteredClassifier();
@@ -47,11 +45,11 @@ public class MyClassifier extends AbstractClassifier{
 		as.setEvaluator(new GainRatioAttributeEval());
 		as.setSearch(new Ranker());
 		fc.setFilter(as);
-		fc.setClassifier(rf);
+		fc.setClassifier(pa);
 		
 		rss.setClassifier(fc);
 		bg.setClassifier(rss);
-		//bg.setPrintClassifiers(true);
+		bg.setPrintClassifiers(true);
 		//rf.setPrintClassifiers(true);
 		System.out.println("-------  START TRAINING  --------");
 		

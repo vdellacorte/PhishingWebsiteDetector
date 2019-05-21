@@ -1,5 +1,6 @@
 
 import java.net.URI;
+
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -26,6 +27,7 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.AddValues;
 import weka.filters.unsupervised.attribute.NumericToNominal;
 import weka.filters.unsupervised.instance.RemoveRange;
+
 
 public class PhishingWebsiteDetector extends Application{
 
@@ -140,9 +142,6 @@ public class PhishingWebsiteDetector extends Application{
 
 	
 				}catch(Exception e) {
-					//http://elon-promo.com/bitcoin/
-					//http://www.tesla-gifting.site
-					//e.printStackTrace();
 						System.out.println("Unable to predict");
 				}
 				
@@ -151,83 +150,22 @@ public class PhishingWebsiteDetector extends Application{
 			}
 			
 		});
-		/*
-		DataSource source1 = null;
-		try {
-			 source1 = new DataSource(dataSourcePath);
-			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		Instances data = source.getDataSet();
-		data.setClassIndex(data.numAttributes()-1);
-		ArrayList<Attribute> al = new ArrayList<>();
-		al.add(new Attribute("Key_Scheme"));
-		al.add(new Attribute("Key_Run"));
-		al.add(new Attribute("ROC"));
-		al.add(new Attribute("Precision"));
 		
-		Instances outInst = new Instances("vote", al,10);
-		
-		Vote v = new Vote();
-		Bagging bg = new Bagging();
-		PART pa = new PART();
-		RandomSubSpace rss = new RandomSubSpace();
-		
-		rss.setClassifier(pa);
-		bg.setClassifier(rss);
-		
-		Bagging bg1 = new Bagging();
-		RandomForest rf = new RandomForest();
-		RandomSubSpace rss1 = new RandomSubSpace();
-		
-		rss1.setClassifier(rf);
-		bg1.setClassifier(rss1);
-		
-		Classifier[] c = new Classifier[2];
-		c[0] = bg;
-		c[1] = bg1;
-		v.setClassifiers(c);
-		
-		for(int i = 1; i<=10; ++i) {
-			
-			Evaluation eval = new Evaluation(data);
-			eval.crossValidateModel(v, data, 5, new Random(i));
-
-			
-			double[] values = new double[outInst.numAttributes()];
-			values[0] = 0;
-			values[1] = i;
-			values[2] = eval.areaUnderROC(data.classAttribute().indexOfValue("-1"));
-			values[3] = eval.pctCorrect();
-			
-			Instance inst = new DenseInstance(1.0,values);
-			outInst.add(inst);
-			System.out.println("Results " + i + "\n");
-			
-		}
-		
-		//System.out.println(outInst);
-		ArffSaver saver = new ArffSaver();
-		saver.setFile(new File("./vote.arff"));
-		saver.setInstances(outInst);
-		saver.writeBatch();
-		*/
 	}
 	
 	
 	public Scene buildGUI() {
 		
 		urlTf.setMinWidth(300);
-		//urlTf.setText("https://www.google.com");
+		urlTf.setPromptText("e.g. https://www.google.com");
+		urlTf.setFocusTraversable(false);
 		HBox urlBox = new HBox(5,new Label("Insert URL:"), urlTf);
 		HBox buttonBox = new HBox(5, startClassification);
 		buttonBox.setAlignment(Pos.CENTER);
 		urlBox.setAlignment(Pos.CENTER);
 		HBox resultBox = new HBox(new Label("Predicted Result: "), predictedResult);
-		VBox vbox = new VBox(40, urlBox,buttonBox, resultBox);
+		VBox transparent = new VBox(10,new VBox(),urlBox);
+		VBox vbox = new VBox(40, transparent, buttonBox, resultBox);
 		Group root = new Group(vbox);
 		Scene scene = new Scene(root, 400,300);
 		
