@@ -74,7 +74,7 @@ public class FeaturesExtractor {
 		double havingAtSymbol = -1;
 		double doubleSlashRedirecting = -1;
 		double prefixSuffix = -1;
-		double sslFinalState = 0;
+		double sslFinalState = 1;
 		double domainRegistrationLength = -1;
 		double httpsToken = -1;
 		double favicon = -1;
@@ -111,6 +111,7 @@ public class FeaturesExtractor {
 		String domain = getDomainFromUrl(url);
 		shortiningService = Arrays.asList(shortiningServiceDomains).contains(domain)? -1 : 1;
 		}catch(Exception e) {
+			System.out.println("Exception in parsing the domain");
 			shortiningService = -1;
 		}
 		System.out.println("Shortining_Service = " + shortiningService + "\n");
@@ -161,30 +162,34 @@ public class FeaturesExtractor {
 	            	
 	                Date certAge = ((X509Certificate) cert).getNotBefore();
 	                Calendar cal = Calendar.getInstance();
-	                cal.add(Calendar.YEAR, 2);
-	                
+	                cal.add(Calendar.YEAR, -2);
+
 	                if( certAge.after(cal.getTime()) ) {
+	                	System.out.println("Certificate issued: " + certAge );
 	                	sslFinalState = 0;
 	                	break;
 	                }
 	                
 	                String issuer = ((X509Certificate) cert).getIssuerDN().getName().split(",")[0];
 					issuer = issuer.substring(3);
-					String[] trustedIssuers = {"Google Internet Authority G3", "GlobalSign", "Verisign", "Terena SSL CA 3", "DigiCert", "GeoTrust", "GoDaddy", "Network Solutions", "Comodo", "Thawte", "Doster"};
+					String[] trustedIssuers = {"Google Internet Authority G3", "GlobalSign", "Verisign", "TERENA SSL CA 3", "DigiCert", "DigiCert Assured ID Root CA","GeoTrust", "GoDaddy", "Network Solutions", "Comodo", "Thawte", "Doster"};
 					
 					if(!(Arrays.asList(trustedIssuers).contains(issuer))) {
+						System.out.println("Certificate issuer not recognized: " + issuer);
 						sslFinalState = 0;
 						break;
 					}
 	                
 	            } else {
-	                sslFinalState = 0;
+	            	System.out.println("Invalid Certificate");
+	                sslFinalState = -1;
 	                break;
 	            }
 	        }
 	        
 	        
 			} catch (Exception e) {
+				System.out.println("Exception parsing certificates");
 				sslFinalState = -1;
 			}
 			
@@ -212,6 +217,8 @@ public class FeaturesExtractor {
 	        parser.setTimeZone(TimeZone.getTimeZone("UTC"));
 	        Date parsed = parser.parse(expiryDate);
 	        
+	        System.out.println("Expiry domain date: " + parsed);
+	        
 	        Calendar cal = Calendar.getInstance();
 	        cal.add(Calendar.YEAR, 1);
 	        
@@ -219,6 +226,7 @@ public class FeaturesExtractor {
 	        
 	        
 		} catch (Exception e) {
+			System.out.println("Exception during parsing expiry domain date");
 			domainRegistrationLength = -1;
 		}
 		
@@ -234,6 +242,7 @@ public class FeaturesExtractor {
 				if(e.attr("rel").contains("icon")) {
 					
 					if(!(isSameDomain(url, e.attr("href").trim()))) {
+						System.out.println("Favicon not on the same domain");
 						favicon = -1;
 						break;
 						
@@ -247,7 +256,7 @@ public class FeaturesExtractor {
 			
 			
 		} catch (Exception e) {
-
+			System.out.println("Exception during searching favicon");
 			favicon = -1;
 		}
 		
@@ -315,7 +324,7 @@ public class FeaturesExtractor {
 		//---- REQUEST URL
 
 		try {
-			Document doc = Jsoup.connect(url).timeout(120*1000).get();
+			Document doc = Jsoup.connect(url).get();
 			
 			Elements sources = doc.select("source");
 			Elements audios = doc.select("audio");
@@ -340,12 +349,15 @@ public class FeaturesExtractor {
 				numNotSameDomain = isSameDomain(url, s) ? numNotSameDomain : numNotSameDomain+1;
 			
 			if(tagUrls.size() > 0) {
+				System.out.println("Num not on same domain: " + numNotSameDomain + "\t" + "Total number: " + tagUrls.size());
 				requestURL = (numNotSameDomain/tagUrls.size() *100 < 22) ? 1 : (numNotSameDomain/tagUrls.size() *100) > 61 ? -1 : 0;
 			}else {
+				System.out.println("0 medias");
 				requestURL = 1;
 			}
 			
 		} catch (Exception e1) {
+			System.out.println("Exception during parsing medias");
 			requestURL = 1;
 		}
 		
@@ -355,7 +367,7 @@ public class FeaturesExtractor {
 		
 		try {
 			
-			Document doc = Jsoup.connect(url).timeout(1000*1000).get();
+			Document doc = Jsoup.connect(url).get();
 
 			Elements anchors = doc.select("a");
         	double numNotSameDomain = 0;
@@ -369,13 +381,16 @@ public class FeaturesExtractor {
 	        }
 	        
 	        if( anchorUrls.size() > 0) {
+	        	System.out.println("Num not on same domain: " + numNotSameDomain + "\t" + "Total number: " + anchorUrls.size());
 	        	urlOfAnchor = (numNotSameDomain/anchorUrls.size()*100) > 67 ? -1 : (numNotSameDomain/anchorUrls.size()*100) < 31 ? 1 : 0;
 	        }else {
+	        	System.out.println("0 anchors");
 	        	urlOfAnchor = 1;
 	        }
 	        	
     		
 		} catch (Exception e) {
+			System.out.println("Excpetion during parsing anchors");
 			urlOfAnchor = 0;
 		}
 		
@@ -415,12 +430,16 @@ public class FeaturesExtractor {
 				numNotSameDomain = isSameDomain(url, u) ? numNotSameDomain : numNotSameDomain+1;
 		}
 		
-		if(tagsUrl.size() > 0)
+		if(tagsUrl.size() > 0) {
+			System.out.println("Num not on same domain: " + numNotSameDomain + "\t" + "Total number: " + tagsUrl.size());
 			linksInTags = (numNotSameDomain/tagsUrl.size() *100 < 17) ? 1 : (numNotSameDomain/tagsUrl.size() *100 > 81) ? -1 : 0;
-		else
+		}else {
+			System.out.println("0 urls");
 			linksInTags = 1;
+		}
 		
 		} catch (Exception e1) {
+			System.out.println("Exception during parsing urls in metas, links, scripts");
 			linksInTags = 0;
 		}
 		
@@ -431,13 +450,15 @@ public class FeaturesExtractor {
 		
 		try {
 			
-			Document doc = Jsoup.connect(url).timeout(1000*1000).get();
+			Document doc = Jsoup.connect(url).get();
 			Elements forms = doc.select("form");
 			ArrayList<String> tagUrls = new ArrayList<String>();
+			
 			
 			for(Element f : forms) {
 				
 				if(!f.hasAttr("action") || f.attr("action").equals("about:blank") || f.attr("action").equals("")) {
+					System.out.println("Action of the form: " + f.attr("action"));
 					sfh = -1;
 					break;
 				}
@@ -451,17 +472,21 @@ public class FeaturesExtractor {
 					
 					for(String s : tagUrls) {
 						if (!isSameDomain(url, s)) {
+							System.out.println("Url in form not on same domain");
 							sfh = 0;
 							break;
 						}else
 							sfh = 1;
 					}
 					
-				}else
+				}else {
+					System.out.println("No forms");
 					sfh = 1;
+				}
 			}	
 
 		} catch (Exception e1) {
+			System.out.println("Exception during parsing forms action");
 			sfh = 0;
 		}
 		
@@ -473,20 +498,27 @@ public class FeaturesExtractor {
 		
 		try {
 			
-			Document doc = Jsoup.connect(url).timeout(1000*1000).get();
+			Document doc = Jsoup.connect(url).get();
 			Elements forms = doc.select("form");
 			
-			for(Element e : forms) {
+			if(forms.size() > 0 ) {
+				for(Element e : forms) {
+					
+					if(e.hasAttr("action") && e.attr("action").startsWith("mailto:")) {
+						System.out.println("mailto: in form found");
+						submittingToEmail = -1;
+						break;
+					}else
+						submittingToEmail = 1;
 				
-				if(e.hasAttr("action") && e.attr("action").startsWith("mailto:")) {
-					submittingToEmail = -1;
-					break;
-				}else
-					submittingToEmail = 1;
-			
+				}
+			}else {
+				System.out.println("No forms found");
+				submittingToEmail = 1;
 			}
 			
 		} catch (Exception e1) {
+			System.out.println("Exception during parsing forms");
 			submittingToEmail = -1;
 		}
 
@@ -503,6 +535,7 @@ public class FeaturesExtractor {
 			abnormalURL = (hostname == null) ? -1: (Character.isDigit(hostname.charAt(0)) == true) ? -1:1;
 
 		} catch (Exception e) {
+			System.out.println("Exception during parsing hostname");
 			abnormalURL = -1;
 		}
 
@@ -543,17 +576,18 @@ public class FeaturesExtractor {
 			String st = whoisData.substring(whoisData.indexOf("Creation Date:")+14);
 			String creationDate = st.substring(0,st.indexOf("Registry Expiry Date"));
 			
-			
 			SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 	        parser.setTimeZone(TimeZone.getTimeZone("UTC"));
 	        Date parsed = parser.parse(creationDate);
 	        
 	        Calendar cal = Calendar.getInstance();
 	        cal.add(Calendar.MONTH, -6);
-
+	        System.out.println("Domain registered on: " + parsed);
+	        
 	        ageOfDomain = parsed.before(parser.parse(parser.format(cal.getTime()))) ? 1:-1;
 	        
 		}catch (Exception e) {
+			System.out.println("Exception during parsing registration domain date");
 			ageOfDomain = -1;
 		} 
 		
@@ -570,9 +604,12 @@ public class FeaturesExtractor {
 			String whoisData = wh.query(getDomainFromUrl(url));
 			wh.disconnect();
 			
+			System.out.println("DNS entry found: " + whoisData.contains("Name Server:"));
+			
 			dnsRecord = whoisData.contains("Name Server:")? 1 : -1;
 			
 		} catch (Exception e1) {
+			System.out.println("Exception during parsing DNS entries");
 			dnsRecord = -1;
 		}
 		
@@ -606,9 +643,12 @@ public class FeaturesExtractor {
 			        JSONObject obj = new JSONObject(json);
 			        int rankResult = obj.getJSONObject("siteinfo").getJSONObject("rank").getInt("global");
 			        
+			        System.out.println("Alexa Rank: " + rankResult);
+			        
 			        webTraffic = rankResult == 0 ? -1: rankResult < 100000 ? 1 : 0;
 			        
 				} catch (Exception e) {
+					System.out.println("Exception during parsing alexa result");
 					webTraffic = -1;
 				} 
 				
@@ -648,18 +688,19 @@ public class FeaturesExtractor {
 					}
 					in.close();
 					con.disconnect();
-
-					//String res = response.toString();
-					//double rank = Integer.parseInt(res.substring(res.indexOf("Google PageRank:")+46, res.indexOf("/10</b>")));
-
+					
+					System.out.println("Page rank: " + rank/10);
+					
 					pageRank = rank/10 < 0.2 ? -1 : 1;
 				
 				} else {
+					System.out.println("Request made too early");
 					pageRank = -1;
 				}
 				
 				
 				} catch (Exception e) {
+					System.out.println("Exception during querying checkpagerank.net");
 					pageRank = -1;
 				}
 				
@@ -691,16 +732,17 @@ public class FeaturesExtractor {
 					result += output;
 			
 			conn.disconnect();
-			//System.out.println(result);
 	         objJ = new JSONObject(result);
 	        
-	        //System.out.println(obj.toString());
 	        	
 	        int googleResults = Integer.parseInt(objJ.getJSONObject("queries").getJSONArray("request").getJSONObject(0).getString("totalResults"));
+	        
+	        System.out.println("Number of results in google query: " + googleResults);
 	        
 	        googleIndex = googleResults == 0 ? -1:1;
 	        
 		}catch(Exception e) {
+			System.out.println("Exception during querying google");
 			googleIndex = -1;
 		}
 		
@@ -721,9 +763,12 @@ public class FeaturesExtractor {
 			   }
 		   }
 		   
+		   System.out.println("Number of links pointing to the webpage: " + numLinksPointing);
+		   
 		   linksPointingToPage = numLinksPointing == 0 ? -1 : numLinksPointing > 2 ? 1 : 0;
 		
 		}catch (Exception e) {
+			System.out.println("Exception during querying google");
 			linksPointingToPage = -1;
 		}
 		
@@ -764,6 +809,7 @@ public class FeaturesExtractor {
 		       
 		        boolean in_db = obj.getJSONObject("results").getBoolean("in_database");
 		        if(in_db == false) {
+		        	System.out.println("url not in phishtank db");
 		        	statisticalReport = 1;
 		        }else {
 		        	
@@ -772,9 +818,11 @@ public class FeaturesExtractor {
 		        		 
 		        		 boolean valid = obj.getJSONObject("results").getBoolean("valid");
 		        		 statisticalReport = valid == false ? 1 : -1;
+		        		 System.out.println("url verified and validPhish=" + valid);
 		        		 
 		        	 }else {
 		        		 
+		        		 System.out.println("url in phishtank db but not verified");
 		        		 statisticalReport = -1;
 		        	 }
 		        }
@@ -785,6 +833,7 @@ public class FeaturesExtractor {
 		
 		
 		} catch (Exception e) {
+			System.out.println("Exception during parsing phishtank results");
 			statisticalReport = 1;
 		}
 		
@@ -834,6 +883,7 @@ public class FeaturesExtractor {
 			
 		}
 		
+		System.out.println("Number of redirecting: " + count);
 		websiteForwarding = (count <= 1) ? 1 : 0;
 		System.out.println("Redirect = " + websiteForwarding + "\n");
 		
@@ -850,6 +900,7 @@ public class FeaturesExtractor {
 				for(Element e : elements) {
 					String javascriptText = e.attr("onmouseover");
 					if(javascriptText.contains("window.status=") || javascriptText.contains("window.status =")) {
+						System.out.println("An onmouseover event modifies StatusBar");
 						statusBarCustomization = -1;
 						break;
 					}else
@@ -857,10 +908,13 @@ public class FeaturesExtractor {
 						
 				}	
 				
-			}else
+			}else {
+				System.out.println("No onmouseover events detected");
 				statusBarCustomization = 1;
+			}
 		
 		} catch (Exception e) {
+			System.out.println("Exception during parsing onmouseover events");
 			statusBarCustomization = 1;
 		}
 		
@@ -878,6 +932,7 @@ public class FeaturesExtractor {
 				
 				for(Element e : elements) {
 					if(e.attr("oncontextmenu").contains("return false")) {
+						System.out.println("Right click disabled");
 						disablingRightClick = -1;
 						break;
 					}else
@@ -885,10 +940,13 @@ public class FeaturesExtractor {
 						
 				}
 				
-			}else
+			}else {
+				System.out.println("No right click disabling");
 				disablingRightClick = 1;
+			}
 			
 		} catch (Exception e) {
+			System.out.println("Exception during parsing oncontextmenu event");
 			disablingRightClick = 1;
 		}
 		
@@ -901,12 +959,15 @@ public class FeaturesExtractor {
 			
 			Document doc = Jsoup.connect(url).get();
 
-			if(doc.data().contains("prompt("))
+			if(doc.data().contains("prompt(")) {
+				System.out.println("Popup windowd with textfield present");
 				usingPopUpWindow = -1;
-			else
+			}else {
+				System.out.println("No popup windows detected");
 				usingPopUpWindow = 1;
-		
+			}
 		} catch (Exception e) {
+			System.out.println("Exception during parsing popup windows");
 			usingPopUpWindow = 1;
 			
 		}
@@ -921,12 +982,15 @@ public class FeaturesExtractor {
 			Document doc = Jsoup.connect(url).get();
 
 			Elements iframes = doc.select("iframe");
-			if(iframes.size() > 0)
+			if(iframes.size() > 0) {
+				System.out.println("Iframe detected");
 				iFRameRedirection = -1;
-			else
+			}else {
+				System.out.println("No iframes detected");
 				iFRameRedirection = 1;
-		
+			}
 		} catch (Exception e) {
+			System.out.println("Exception during parsing iframes");
 			iFRameRedirection = 1;
 		}
 		
