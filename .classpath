@@ -2,18 +2,18 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/Users/vincent/eclipse-workspace/PhishingWebsiteDetector/lib/jfxrt.jar"/>
-	<classpathentry kind="lib" path="C:/Users/vincent/eclipse-workspace/PhishingWebsiteDetector/lib/jsoup-1.11.3.jar"/>
-	<classpathentry kind="lib" path="C:/Users/vincent/eclipse-workspace/PhishingWebsiteDetector/lib/json-20160212.jar"/>
-	<classpathentry kind="lib" path="C:/Users/vincent/eclipse-workspace/PhishingWebsiteDetector/lib/commons-net-3.0.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/vincent/eclipse-workspace/PhishingWebsiteDetector/lib/guava-27.1-jre.jar"/>
-	<classpathentry kind="lib" path="C:/Users/vincent/eclipse-workspace/PhishingWebsiteDetector/lib/arpack_combined.jar"/>
-	<classpathentry kind="lib" path="C:/Users/vincent/eclipse-workspace/PhishingWebsiteDetector/lib/bounce.jar"/>
-	<classpathentry kind="lib" path="C:/Users/vincent/eclipse-workspace/PhishingWebsiteDetector/lib/commons-compress-1.10.jar"/>
-	<classpathentry kind="lib" path="C:/Users/vincent/eclipse-workspace/PhishingWebsiteDetector/lib/core.jar"/>
-	<classpathentry kind="lib" path="C:/Users/vincent/eclipse-workspace/PhishingWebsiteDetector/lib/java-cup.jar"/>
-	<classpathentry kind="lib" path="C:/Users/vincent/eclipse-workspace/PhishingWebsiteDetector/lib/JFlex.jar"/>
-	<classpathentry kind="lib" path="C:/Users/vincent/eclipse-workspace/PhishingWebsiteDetector/lib/junit.jar"/>
-	<classpathentry kind="lib" path="C:/Users/vincent/eclipse-workspace/PhishingWebsiteDetector/lib/mtj.jar"/>
+	<classpathentry kind="lib" path="lib/jfxrt.jar"/>
+	<classpathentry kind="lib" path="lib/jsoup-1.11.3.jar"/>
+	<classpathentry kind="lib" path="lib/json-20160212.jar"/>
+	<classpathentry kind="lib" path="lib/commons-net-3.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/guava-27.1-jre.jar"/>
+	<classpathentry kind="lib" path="lib/arpack_combined.jar"/>
+	<classpathentry kind="lib" path="lib/bounce.jar"/>
+	<classpathentry kind="lib" path="lib/commons-compress-1.10.jar"/>
+	<classpathentry kind="lib" path="lib/core.jar"/>
+	<classpathentry kind="lib" path="lib/java-cup.jar"/>
+	<classpathentry kind="lib" path="lib/JFlex.jar"/>
+	<classpathentry kind="lib" path="lib/junit.jar"/>
+	<classpathentry kind="lib" path="lib/mtj.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

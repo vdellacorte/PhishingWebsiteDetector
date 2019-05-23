@@ -131,8 +131,6 @@ public class PhishingWebsiteDetector extends Application{
 				}	
 					
 				try {
-					//DataSink.write("./prova.arff", newTest2);
-					//System.out.println(newTest2.lastInstance());
 					double[] predictedDistribution = myPredictor.distributionForInstance(newTest2.lastInstance());
 					double predictedClass =  myPredictor.classifyInstance(newTest2.lastInstance());
 					setResultLabel(predictedDistribution, predictedClass);
