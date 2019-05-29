@@ -1,10 +1,12 @@
 
+import java.io.File;
 import java.net.URI;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -12,6 +14,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -34,10 +38,13 @@ public class PhishingWebsiteDetector extends Application{
 	private TextField urlTf = new TextField();
 	private Label predictedResult = new Label();
 	private Button startClassification = new Button("PREDICT");
+	private ImageView loading = new ImageView();
 	
 	private Classifier myPredictor = new MyClassifier();
 	private String dataSourcePath = "./phishing_data_no_similar.arff";
 	private Instances trainingData, test;
+	
+	private String loadingSourcePath = "img/loading.gif";
 	
 	@Override
 	public void start(Stage stage) {
@@ -84,64 +91,10 @@ public class PhishingWebsiteDetector extends Application{
 			}
 			
 			if(host != null) {
-					
 				
-				double[] features = FeaturesExtractor.extract(url, test.numAttributes());
-				Instance unlabeledInstance = new DenseInstance(1.0,features);
-				test.add(unlabeledInstance);
-				NumericToNominal ntn = new NumericToNominal();
-				String[] opt = new String[2];
-				opt[0] = "-R";
-				opt[1] = "first-last";
-				Instances newTest = null;
-				try{
-					ntn.setOptions(opt);
-					ntn.setInputFormat(test);
-					newTest = Filter.useFilter(test, ntn);
-				}catch(Exception e) {
-					System.out.println("There was a problem in applying NumeriToNominal Filter");
-				
-				}
-				Instances newTest2 = new Instances(newTest);
-				
-				for(int i=0; i<trainingData.numAttributes(); ++i) {
-					
-					Enumeration<Object> distinctValues = trainingData.attribute(i).enumerateValues();
-					ArrayList<String> values = new ArrayList<String>();
-					while(distinctValues.hasMoreElements())
-						values.add(distinctValues.nextElement().toString());
-					
-						AddValues av = new AddValues();
-						av.setSort(true);
-						av.setAttributeIndex(String.valueOf(i+1));
-						String commaValues = "";
-						for(String label: values)
-							commaValues +=label + ",";
-						av.setLabels(commaValues);
-						
-						try {
-							av.setInputFormat(newTest2);
-							newTest2 = Filter.useFilter(newTest2, av);
-						} catch (Exception e) {
-							System.out.println("There was a problem");
-						}
-	
-	
-				
-				}	
-					
-				try {
-					double[] predictedDistribution = myPredictor.distributionForInstance(newTest2.lastInstance());
-					double predictedClass =  myPredictor.classifyInstance(newTest2.lastInstance());
-					setResultLabel(predictedDistribution, predictedClass);
-					
-					System.out.println("Class Prediction : " + predictedClass);
-					System.out.println("Result: " + predictedDistribution[0] + "\t" + predictedDistribution[1]);
-
-	
-				}catch(Exception e) {
-						System.out.println("Unable to predict");
-				}
+				loading.setImage(new Image(new File(loadingSourcePath).toURI().toString()));
+				Thread t = new Thread(new BackgroundExtractor(url));
+				t.start();
 				
 			}else {
 				System.out.println("Malformed URI");
@@ -157,11 +110,17 @@ public class PhishingWebsiteDetector extends Application{
 		urlTf.setMinWidth(300);
 		urlTf.setPromptText("e.g. https://www.google.com");
 		urlTf.setFocusTraversable(false);
-		HBox urlBox = new HBox(5,new Label("Insert URL:"), urlTf);
-		HBox buttonBox = new HBox(5, startClassification);
+		loading.setFitHeight(30);
+		loading.setFitWidth(30);
+		loading.setPreserveRatio(true);
+		loading.setImage(null);
+		HBox urlBox = new HBox(10,new HBox(),new Label("URL:"), urlTf);
+		HBox foo = new HBox();
+		foo.setPrefWidth(60);
+		HBox buttonBox = new HBox(20, foo, startClassification, loading);
 		buttonBox.setAlignment(Pos.CENTER);
 		urlBox.setAlignment(Pos.CENTER);
-		HBox resultBox = new HBox(new Label("Predicted Result: "), predictedResult);
+		HBox resultBox = new HBox(10, new HBox(),new Label("Predicted Result: "), predictedResult);
 		VBox transparent = new VBox(10,new VBox(),urlBox);
 		VBox vbox = new VBox(40, transparent, buttonBox, resultBox);
 		Group root = new Group(vbox);
@@ -259,5 +218,84 @@ public class PhishingWebsiteDetector extends Application{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	private class BackgroundExtractor implements Runnable{
+		
+		private String url = "";
+		
+		public BackgroundExtractor(String u) {
+			// TODO Auto-generated constructor stub
+			url = u;
+		}	
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			
+			double[] features = FeaturesExtractor.extract(url, test.numAttributes());
+			Instance unlabeledInstance = new DenseInstance(1.0,features);
+			test.add(unlabeledInstance);
+			NumericToNominal ntn = new NumericToNominal();
+			String[] opt = new String[2];
+			opt[0] = "-R";
+			opt[1] = "first-last";
+			Instances newTest = null;
+			try{
+				ntn.setOptions(opt);
+				ntn.setInputFormat(test);
+				newTest = Filter.useFilter(test, ntn);
+			}catch(Exception e) {
+				System.out.println("There was a problem in applying NumeriToNominal Filter");
+				loading.setImage(null);
+			
+			}
+			Instances newTest2 = new Instances(newTest);
+			
+			for(int i=0; i<trainingData.numAttributes(); ++i) {
+				
+				Enumeration<Object> distinctValues = trainingData.attribute(i).enumerateValues();
+				ArrayList<String> values = new ArrayList<String>();
+				while(distinctValues.hasMoreElements())
+					values.add(distinctValues.nextElement().toString());
+				
+					AddValues av = new AddValues();
+					av.setSort(true);
+					av.setAttributeIndex(String.valueOf(i+1));
+					String commaValues = "";
+					for(String label: values)
+						commaValues +=label + ",";
+					av.setLabels(commaValues);
+					
+					try {
+						av.setInputFormat(newTest2);
+						newTest2 = Filter.useFilter(newTest2, av);
+					} catch (Exception e) {
+						System.out.println("There was a problem");
+						loading.setImage(null);
+					}
+
+
+			
+			}	
+				
+			try {
+				double[] predictedDistribution = myPredictor.distributionForInstance(newTest2.lastInstance());
+				double predictedClass =  myPredictor.classifyInstance(newTest2.lastInstance());
+				
+				Platform.runLater(()->{
+					setResultLabel(predictedDistribution, predictedClass);
+				});
+				
+				System.out.println("Class Prediction : " + predictedClass);
+				System.out.println("Result: " + predictedDistribution[0] + "\t" + predictedDistribution[1]);
+
+
+			}catch(Exception e) {
+					System.out.println("Unable to predict");
+			}finally {
+				loading.setImage(null);
+			}
+		}
+		
 	}
 }
